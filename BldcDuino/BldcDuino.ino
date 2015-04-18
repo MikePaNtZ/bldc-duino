@@ -3,9 +3,20 @@
 #include <EEPROM.h>
 #include <RobotOpen.h>
 
-/* Parameter Setup */
-ROFloatParameter TlmVelocityCmd("Velocity Cmd", 0);   	// A value that can be updated remotely
-ROPWM velocityCmd(5);
+// Tuning Constants
+#define SENSOR1_CHAN 1
+#define PWM_CHAN 1
+#define MAX_VEL 5000
+
+// Dashboard Parameters
+ROIntParameter VelocityCmd("Velocity Cmd", 0);   	// A value that can be updated remotely
+
+// Sensor Input
+ROEncoder positionSensor(SENSOR1_CHAN);
+
+//Velocity Control PWM Output
+ROPWM velocityPwm(PWM_CHAN);
+
 
 void setup()
 {
@@ -18,7 +29,11 @@ void setup()
  * should live here that allows the robot to operate
  */
 void enabled() {
-  velocityCmd.write(220);
+  int velPwm = map(VelocityCmd.get(), 0, MAX_VEL, 0, 255);
+  velocityPwm.write(velPwm);
+  String velocityDebugMsg = "Velocity and PWM: ";
+  velocityDebugMsg += velPwm;
+  RODashboard.debug(velocityDebugMsg);
 }
 
 
@@ -34,7 +49,10 @@ void disabled() {
  * This is also a good spot to put driver station publish code
  */
 void timedtasks() {
-  RODashboard.publish("Velocity Cmd", TlmVelocityCmd.get());
+  // encoders can also be reset to zero by calling encoderName.reset();
+  RODashboard.publish("Position", positionSensor.read());
+  RODashboard.publish("Active PWM Channel", PWM_CHAN);
+  RODashboard.publish("Velocity Cmd", VelocityCmd.get());
   RODashboard.publish("Uptime Seconds", ROStatus.uptimeSeconds());
 }
 
