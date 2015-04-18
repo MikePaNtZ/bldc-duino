@@ -4,8 +4,8 @@
 #include <RobotOpen.h>
 
 /* Parameter Setup */
-ROFloatParameter remoteVal("Velocity Cmd", 0);   	// A value that can be updated remotely
-
+ROFloatParameter TlmVelocityCmd("Velocity Cmd", 0);   	// A value that can be updated remotely
+ROPWM velocityCmd(5);
 
 void setup()
 {
@@ -18,7 +18,7 @@ void setup()
  * should live here that allows the robot to operate
  */
 void enabled() {
-  // don't do anything
+  velocityCmd.write(220);
 }
 
 
@@ -34,7 +34,7 @@ void disabled() {
  * This is also a good spot to put driver station publish code
  */
 void timedtasks() {
-  RODashboard.publish("Remote Value", remoteVal.get());
+  RODashboard.publish("Velocity Cmd", TlmVelocityCmd.get());
   RODashboard.publish("Uptime Seconds", ROStatus.uptimeSeconds());
 }
 
